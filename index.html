@@ -29,6 +29,11 @@
             content: ' \25BC';
             color: #1f2937;
         }
+        /* Classes para indicadores visuais */
+        .text-percent-high { color: #dc2626; } /* Vermelho para alta % de fêmeas */
+        .text-percent-low { color: #2563eb; } /* Azul para baixa % de fêmeas */
+        .text-change-up { color: #dc2626; } /* Vermelho para aumento (ruim para abate de fêmea) */
+        .text-change-down { color: #16a34a; } /* Verde para queda (bom) */
     </style>
     <!-- Importa a fonte Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,7 +44,7 @@
     <div class="container mx-auto p-4 sm:p-8 max-w-7xl">
         <header class="mb-8 p-6 bg-white rounded-lg shadow-md">
             <h1 class="text-3xl font-bold text-gray-800">Consolidador e Analisador de Abate SIF</h1>
-            <p class="text-gray-600 mt-2">Carregue seus arquivos CSV ou Excel (.xlsx) para consolidar tudo em uma única tabela interativa.</p>
+            <p class="text-gray-600 mt-2">Carregue seus arquivos CSV ou Excel (.xlsx) para consolidar e analisar os dados.</p>
         </header>
 
         <!-- Seção de Upload -->
@@ -57,18 +62,18 @@
                 <p class="text-xs text-gray-500 mt-2">Você pode selecionar múltiplos arquivos (.csv ou .xlsx) de uma vez.</p>
             </div>
             <button id="processButton" class="mt-6 w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                Consolidar e Exibir Dados
+                Consolidar e Analisar Dados
             </button>
         </div>
 
         <!-- Seção de Dados Consolidados -->
         <div id="dataSection" class="bg-white p-6 rounded-lg shadow-md hidden">
-            <!-- ... (o restante da seção de dados é idêntico) ... -->
+            
             <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-                <h2 class="text-2xl font-semibold">2. Tabela Super Completa</h2>
+                <h2 class="text-2xl font-semibold">Resultados da Análise</h2>
                 <div class="flex gap-4">
                     <button id="downloadButton" class="bg-green-600 text-white font-semibold py-2 px-5 rounded-lg shadow hover:bg-green-700 transition duration-300">
-                        Baixar CSV Consolidado
+                        Baixar CSV Completo
                     </button>
                     <button id="clearButton" class="bg-red-600 text-white font-semibold py-2 px-5 rounded-lg shadow hover:bg-red-700 transition duration-300">
                         Limpar e Recomeçar
@@ -82,8 +87,9 @@
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mt-4"></div>
             </div>
 
-            <!-- Resumo dos Dados -->
-            <div id="dataSummary" class="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4 hidden">
+            <!-- 2. Resumo dos Dados -->
+            <h3 class="text-xl font-semibold mb-4 border-b pb-2">2. Resumo Geral</h3>
+            <div id="dataSummary" class="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4 hidden">
                 <div class="bg-gray-50 p-4 rounded-lg shadow-inner">
                     <p class="text-sm font-medium text-gray-500">Total de Registros</p>
                     <p id="totalRows" class="text-2xl font-bold"></p>
@@ -102,7 +108,56 @@
                 </div>
             </div>
 
-            <!-- Tabela Interativa -->
+            <!-- 3. Análises Agrupadas (NOVA SEÇÃO) -->
+            <h3 class="text-xl font-semibold mb-4 border-b pb-2">3. Análises Agrupadas</h3>
+            <div id="analysisSection" class="hidden mb-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <!-- Tabela de Análise por UF -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-3">Análise por Estado (UF)</h4>
+                    <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+                        <table class="w-full min-w-max">
+                            <thead class="bg-gray-100 text-left text-sm font-semibold text-gray-700">
+                                <tr>
+                                    <th class="px-4 py-3">UF</th>
+                                    <th class="px-4 py-3 text-right">Total Abatido</th>
+                                    <th class="px-4 py-3 text-right">Machos</th>
+                                    <th class="px-4 py-3 text-right">Fêmeas</th>
+                                    <th class="px-4 py-3 text-right">% Fêmeas</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ufAnalysisTableBody" class="bg-white divide-y divide-gray-200 text-sm">
+                                <!-- Dados da análise por UF serão injetados aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tabela de Análise por Mês/Ano -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-3">Análise por Mês/Ano</h4>
+                    <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+                         <table class="w-full min-w-max">
+                            <thead class="bg-gray-100 text-left text-sm font-semibold text-gray-700">
+                                <tr>
+                                    <th class="px-4 py-3">Mês/Ano</th>
+                                    <th class="px-4 py-3 text-right">Total Abatido</th>
+                                    <th class="px-4 py-3 text-right">Machos</th>
+                                    <th class="px-4 py-3 text-right">Fêmeas</th>
+                                    <th class="px-4 py-3 text-right">% Fêmeas</th>
+                                    <th class="px-4 py-3 text-right">Var. Fêmea (Mês)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mesAnoAnalysisTableBody" class="bg-white divide-y divide-gray-200 text-sm">
+                                <!-- Dados da análise por Mês/Ano serão injetados aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Tabela Super Completa -->
+            <h3 class="text-xl font-semibold mb-4 border-b pb-2">4. Tabela Super Completa (Dados Brutos)</h3>
             <div id="tableContainer" class="w-full overflow-x-auto rounded-lg border border-gray-200 shadow-sm hidden">
                 <table id="dataTable" class="w-full min-w-max">
                     <thead id="tableHeader" class="bg-gray-100 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
@@ -118,6 +173,7 @@
     </div>
 
     <script>
+        // ... (constantes de elementos - fileInput, processButton, etc.) ...
         const fileInput = document.getElementById('csvFiles');
         const processButton = document.getElementById('processButton');
         const downloadButton = document.getElementById('downloadButton');
@@ -136,17 +192,24 @@
         const totalMacho = document.getElementById('totalMacho');
         const totalFemea = document.getElementById('totalFemea');
 
+        // NOVOS Elementos de Análise
+        const analysisSection = document.getElementById('analysisSection');
+        const ufAnalysisTableBody = document.getElementById('ufAnalysisTableBody');
+        const mesAnoAnalysisTableBody = document.getElementById('mesAnoAnalysisTableBody');
+
+
         let allData = [];
         let tableHeaderFields = [];
         let sortColumn = -1;
         let sortDirection = 'asc';
         let filters = {};
+        let columnNames = {}; // Armazena os nomes corretos das colunas
 
         // 1. Processar os arquivos (CSV ou XLSX)
         processButton.addEventListener('click', () => {
+            // ... (lógica de verificação de arquivos) ...
             const files = fileInput.files;
             if (files.length === 0) {
-                // Modificado para não usar alert
                 showModal('Por favor, selecione pelo menos um arquivo CSV ou XLSX.');
                 return;
             }
@@ -166,6 +229,7 @@
                             header: true,
                             skipEmptyLines: true,
                             complete: (results) => {
+                                // ... (lógica de parse CSV) ...
                                 if (results.errors.length) {
                                     reject(results.errors);
                                 } else {
@@ -189,6 +253,7 @@
                         // --- Lógica para XLSX (SheetJS) ---
                         const reader = new FileReader();
                         reader.onload = (e) => {
+                            // ... (lógica de parse XLSX) ...
                             try {
                                 const data = e.target.result;
                                 const workbook = XLSX.read(data, { type: 'array' });
@@ -228,7 +293,7 @@
 
             Promise.all(promises)
                 .then(results => {
-                    allData = results.flat(); // Junta os dados de todos os arquivos
+                    allData = results.flat(); 
                     loadingIndicator.classList.add('hidden');
 
                     if (allData.length > 0) {
@@ -236,12 +301,23 @@
                         const allKeys = new Set();
                         allData.forEach(row => Object.keys(row).forEach(key => allKeys.add(key)));
                         tableHeaderFields = Array.from(allKeys);
+
+                        // Identifica os nomes das colunas principais
+                        findColumnNames();
                         
+                        // Renderiza Tabela de Dados Brutos
                         renderTableHeader();
-                        applyFiltersAndSort(); // Renderiza a tabela com os dados
+                        applyFiltersAndSort(); 
+                        
+                        // Renderiza Resumos e Análises
                         updateSummary();
+                        const { analysisByUF, analysisByMes } = processAnalysis();
+                        renderAnalysisTables(analysisByUF, analysisByMes);
+
+                        // Exibe as seções
                         tableContainer.classList.remove('hidden');
                         dataSummary.classList.remove('hidden');
+                        analysisSection.classList.remove('hidden'); // MOSTRA A NOVA SEÇÃO
                     } else {
                         noDataMessage.classList.remove('hidden');
                     }
@@ -249,22 +325,28 @@
                 .catch(error => {
                     loadingIndicator.classList.add('hidden');
                     console.error('Erro ao processar arquivos:', error);
-                    // Modificado para não usar alert
                     showModal(`Ocorreu um erro ao ler os arquivos: ${error.message}. Verifique o console para mais detalhes.`);
                 });
         });
 
-        // 2. Normalizar Cabeçalhos (remove caracteres estranhos)
+        // 2. Normalizar Cabeçalhos
         function normalizeHeader(header) {
-            // Remove caracteres inválidos, mas mantém / e espaço
             return header.replace(/[^a-zA-Z0-9/ ]/g, "").trim();
         }
+
+        // NOVO: Identifica colunas chave
+        function findColumnNames() {
+            columnNames.sexo = tableHeaderFields.find(f => f.toLowerCase().includes('sexo'));
+            columnNames.qtd = tableHeaderFields.find(f => f.toLowerCase().includes('quantidade'));
+            columnNames.uf = tableHeaderFields.find(f => f.toLowerCase().includes('uf'));
+            columnNames.mesAno = tableHeaderFields.find(f => f.toLowerCase().includes('mês/ano'));
+        }
         
-        // 3. Renderizar o Cabeçalho da Tabela e Filtros
+        // 3. Renderizar o Cabeçalho da Tabela (Tabela Bruta)
         function renderTableHeader() {
+            // ... (função renderTableHeader idêntica) ...
             tableHeader.innerHTML = '';
             
-            // Linha de Títulos (para ordenação)
             const titleRow = document.createElement('tr');
             tableHeaderFields.forEach((field, index) => {
                 const th = document.createElement('th');
@@ -284,7 +366,6 @@
                         sortDirection = 'asc';
                     }
                     
-                    // Atualiza classes CSS
                     document.querySelectorAll('#tableHeader th').forEach(h => h.classList.remove('asc', 'desc'));
                     th.classList.add(sortDirection);
                     
@@ -294,7 +375,6 @@
             });
             tableHeader.appendChild(titleRow);
 
-            // Linha de Filtros
             const filterRow = document.createElement('tr');
             filterRow.className = 'bg-gray-50';
             tableHeaderFields.forEach((field, index) => {
@@ -316,8 +396,9 @@
             tableHeader.appendChild(filterRow);
         }
 
-        // 4. Aplicar Filtros e Ordenação, e Renderizar Corpo da Tabela
+        // 4. Aplicar Filtros e Ordenação (Tabela Bruta)
         function applyFiltersAndSort() {
+            // ... (função applyFiltersAndSort idêntica) ...
             let filteredData = [...allData];
 
             // Aplicar Filtros
@@ -334,7 +415,6 @@
             // Aplicar Ordenação
             if (sortColumn !== -1) {
                 const fieldName = tableHeaderFields[sortColumn];
-                // Tenta comparar como números (especialmente para 'Quantidade')
                 const isNumericColumn = fieldName.toLowerCase().includes('quantidade');
 
                 filteredData.sort((a, b) => {
@@ -362,9 +442,10 @@
             renderTableBody(filteredData);
         }
 
-        // 5. Renderizar o Corpo da Tabela
+        // 5. Renderizar o Corpo da Tabela (Tabela Bruta)
         function renderTableBody(data) {
-            tableBody.innerHTML = ''; // Limpa o corpo da tabela
+            // ... (função renderTableBody quase idêntica) ...
+            tableBody.innerHTML = '';
             
             if (data.length === 0) {
                  tableBody.innerHTML = `<tr><td colspan="${tableHeaderFields.length}" class="text-center p-8 text-gray-500">Nenhum resultado encontrado para os filtros aplicados.</td></tr>`;
@@ -378,53 +459,47 @@
                 tableHeaderFields.forEach(field => {
                     const td = document.createElement('td');
                     td.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-700';
-                    td.textContent = row[field] || ''; // Usa o campo normalizado
                     
-                    // Alinha 'Quantidade' à direita
-                    if (field.toLowerCase().includes('quantidade')) {
+                    let cellValue = row[field] || '';
+
+                    // Formata datas Mês/Ano
+                    if (field === columnNames.mesAno) {
+                        cellValue = formatMesAno(cellValue);
+                    }
+                    
+                    // Alinha 'Quantidade'
+                    if (field === columnNames.qtd) {
                         td.classList.add('text-right', 'font-medium');
-                        td.textContent = (parseInt(row[field]) || 0).toLocaleString('pt-BR');
-                    }
-                    
-                    // Formata datas Mês/Ano se vierem do Excel como números
-                    if (field.toLowerCase().includes('mês/ano') && typeof row[field] === 'number' && row[field] > 40000) {
-                        // Tenta converter data serial do Excel (simplificado)
-                        const date = new Date(Math.round((row[field] - 25569) * 86400 * 1000));
-                        const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
-                        const year = date.getUTCFullYear();
-                        td.textContent = `${month}/${year}`;
+                        cellValue = (parseInt(cellValue) || 0).toLocaleString('pt-BR');
                     }
 
-
+                    td.textContent = cellValue;
                     tr.appendChild(td);
                 });
                 tableBody.appendChild(tr);
             });
         }
         
-        // 6. Atualizar Resumo
+        // 6. Atualizar Resumo Geral
         function updateSummary() {
+            // ... (função updateSummary idêntica, mas usa columnNames) ...
             const formatter = new Intl.NumberFormat('pt-BR');
             let totalQty = 0;
             let totalM = 0;
             let totalF = 0;
             
-            // Pega os nomes corretos das colunas (já normalizados)
-            const sexoField = tableHeaderFields.find(f => f.toLowerCase().includes('sexo'));
-            const qtdField = tableHeaderFields.find(f => f.toLowerCase().includes('quantidade'));
-
-            if (!qtdField) {
+            if (!columnNames.qtd) {
                 console.warn("Não foi possível encontrar a coluna 'Quantidade' para o resumo.");
                 return;
             }
 
             allData.forEach(row => {
-                const qty = parseInt(row[qtdField]) || 0;
+                const qty = parseInt(row[columnNames.qtd]) || 0;
                 totalQty += qty;
                 
-                if (sexoField && row[sexoField] && String(row[sexoField]).toLowerCase().includes('macho')) {
+                if (columnNames.sexo && row[columnNames.sexo] && String(row[columnNames.sexo]).toLowerCase().includes('macho')) {
                     totalM += qty;
-                } else if (sexoField && row[sexoField] && String(row[sexoField]).toLowerCase().includes('fêmea')) {
+                } else if (columnNames.sexo && row[columnNames.sexo] && String(row[columnNames.sexo]).toLowerCase().includes('fêmea')) {
                     totalF += qty;
                 }
             });
@@ -435,49 +510,148 @@
             totalFemea.textContent = formatter.format(totalF);
         }
 
-        // 7. Botão de Download
+        // NOVO: 7. Processar Análises Agrupadas
+        function processAnalysis() {
+            const analysisByUF = {};
+            const analysisByMes = {};
+
+            if (!columnNames.qtd || !columnNames.uf || !columnNames.mesAno) {
+                console.error("Colunas essenciais (Qtd, UF, Mês/Ano) não encontradas para análise.");
+                return { analysisByUF, analysisByMes };
+            }
+
+            allData.forEach(row => {
+                const uf = row[columnNames.uf] || 'Indefinido';
+                const mesAno = formatMesAno(row[columnNames.mesAno]) || 'Indefinido';
+                const sexo = (columnNames.sexo && row[columnNames.sexo]) ? String(row[columnNames.sexo]).toLowerCase() : 'indefinido';
+                const qty = parseInt(row[columnNames.qtd]) || 0;
+
+                // Agrega por UF
+                if (!analysisByUF[uf]) {
+                    analysisByUF[uf] = { total: 0, macho: 0, femea: 0 };
+                }
+                analysisByUF[uf].total += qty;
+                if (sexo.includes('macho')) {
+                    analysisByUF[uf].macho += qty;
+                } else if (sexo.includes('fêmea')) {
+                    analysisByUF[uf].femea += qty;
+                }
+
+                // Agrega por Mês/Ano
+                if (mesAno !== 'Indefinido') {
+                    if (!analysisByMes[mesAno]) {
+                        analysisByMes[mesAno] = { total: 0, macho: 0, femea: 0 };
+                    }
+                    analysisByMes[mesAno].total += qty;
+                    if (sexo.includes('macho')) {
+                        analysisByMes[mesAno].macho += qty;
+                    } else if (sexo.includes('fêmea')) {
+                        analysisByMes[mesAno].femea += qty;
+                    }
+                }
+            });
+
+            return { analysisByUF, analysisByMes };
+        }
+
+        // NOVO: 8. Renderizar Tabelas de Análise
+        function renderAnalysisTables(analysisByUF, analysisByMes) {
+            const formatter = new Intl.NumberFormat('pt-BR');
+
+            // --- Tabela UF ---
+            ufAnalysisTableBody.innerHTML = '';
+            const ufKeys = Object.keys(analysisByUF).sort();
+            ufKeys.forEach(uf => {
+                const data = analysisByUF[uf];
+                const femeaPercent = (data.total > 0) ? (data.femea / data.total * 100) : 0;
+                const percentClass = femeaPercent > 50 ? 'text-percent-high font-bold' : 'text-percent-low';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-4 py-3 font-medium">${uf}</td>
+                    <td class="px-4 py-3 text-right">${formatter.format(data.total)}</td>
+                    <td class="px-4 py-3 text-right">${formatter.format(data.macho)}</td>
+                    <td class="px-4 py-3 text-right">${formatter.format(data.femea)}</td>
+                    <td class="px-4 py-3 text-right ${percentClass}">${femeaPercent.toFixed(1)}%</td>
+                `;
+                ufAnalysisTableBody.appendChild(tr);
+            });
+
+            // --- Tabela Mês/Ano ---
+            mesAnoAnalysisTableBody.innerHTML = '';
+            const mesAnoKeys = Object.keys(analysisByMes).sort(sortMesAno); // Ordena as datas
+            
+            let previousFemeaQty = 0;
+
+            mesAnoKeys.forEach(mesAno => {
+                const data = analysisByMes[mesAno];
+                const femeaPercent = (data.total > 0) ? (data.femea / data.total * 100) : 0;
+                const percentClass = femeaPercent > 50 ? 'text-percent-high font-bold' : 'text-percent-low';
+
+                // Cálculo da Variação Mensal
+                let momChange = 0;
+                let momClass = 'text-gray-500';
+                if (previousFemeaQty > 0) {
+                    momChange = (data.femea - previousFemeaQty) / previousFemeaQty * 100;
+                    if(momChange > 0) {
+                        momClass = 'text-change-up font-bold'; // Aumento de abate de fêmea
+                    } else if (momChange < 0) {
+                        momClass = 'text-change-down font-bold'; // Queda
+                    }
+                }
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-4 py-3 font-medium">${mesAno}</td>
+                    <td class="px-4 py-3 text-right">${formatter.format(data.total)}</td>
+                    <td class="px-4 py-3 text-right">${formatter.format(data.macho)}</td>
+                    <td class="px-4 py-3 text-right">${formatter.format(data.femea)}</td>
+                    <td class="px-4 py-3 text-right ${percentClass}">${femeaPercent.toFixed(1)}%</td>
+                    <td class="px-4 py-3 text-right ${momClass}">${previousFemeaQty === 0 ? '-' : (momChange > 0 ? '+' : '') + momChange.toFixed(1) + '%'}</td>
+                `;
+                mesAnoAnalysisTableBody.appendChild(tr);
+
+                previousFemeaQty = data.femea; // Guarda para o próximo loop
+            });
+        }
+
+        // 9. Botão de Download
         downloadButton.addEventListener('click', () => {
+            // ... (função downloadButton idêntica) ...
             if (allData.length === 0) {
                 showModal('Não há dados para baixar.');
                 return;
             }
-
-            // Converte os dados (array de objetos) para o formato que o PapaParse espera (array de arrays)
             const csvData = allData.map(row => {
-                return tableHeaderFields.map(field => row[field] || ''); // Garante que valores nulos se tornem strings vazias
+                return tableHeaderFields.map(field => row[field] || ''); 
             });
-            
-            // Adiciona o cabeçalho
             csvData.unshift(tableHeaderFields);
-
             const csvString = Papa.unparse(csvData);
-            
             const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
-            
             link.setAttribute('href', url);
-            link.setAttribute('download', 'dados_consolidados.csv');
+            link.setAttribute('download', 'dados_consolidados_completos.csv');
             link.style.visibility = 'hidden';
-            
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         });
         
-        // 8. Limpar e Recomeçar
+        // 10. Limpar e Recomeçar
         clearButton.addEventListener('click', () => {
             resetState();
-            fileInput.value = ''; // Limpa a seleção de arquivos
+            fileInput.value = ''; 
         });
         
-        // 9. Função para resetar o estado da UI
+        // 11. Função para resetar o estado da UI
         function resetState() {
             allData = [];
             tableHeaderFields = [];
             filters = {};
             sortColumn = -1;
             sortDirection = 'asc';
+            columnNames = {};
 
             dataSection.classList.add('hidden');
             tableContainer.classList.add('hidden');
@@ -486,21 +660,23 @@
             loadingIndicator.classList.add('hidden');
             tableHeader.innerHTML = '';
             tableBody.innerHTML = '';
+            
+            // Limpa as novas tabelas
+            analysisSection.classList.add('hidden');
+            ufAnalysisTableBody.innerHTML = '';
+            mesAnoAnalysisTableBody.innerHTML = '';
         }
         
-        // 10. Função para mostrar modal (substitui o alert)
+        // 12. Função para mostrar modal (substitui o alert)
         function showModal(message) {
-            // Remove modal existente se houver
+            // ... (função showModal idêntica) ...
             const existingModal = document.getElementById('alertModal');
             if (existingModal) {
                 existingModal.remove();
             }
-
-            // Cria o modal
             const modal = document.createElement('div');
             modal.id = 'alertModal';
             modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50';
-            
             modal.innerHTML = `
                 <div class="relative mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
                     <div class="mt-3 text-center">
@@ -516,9 +692,7 @@
                     </div>
                 </div>
             `;
-            
             document.body.appendChild(modal);
-            
             document.getElementById('closeModalButton').onclick = function() {
                 modal.remove();
             }
@@ -527,6 +701,61 @@
                     modal.remove();
                 }
             }
+        }
+
+        // --- NOVAS FUNÇÕES UTILITÁRIAS ---
+
+        // Converte data serial do Excel para JS Date
+        function excelDateToJSDate(serial) {
+             if (isNaN(serial) || serial < 1) {
+                return null;
+            }
+            // Data base do Excel é 30/12/1899, não 01/01/1900 por causa do bug do Lotus 1-2-3
+            const excelEpoch = new Date(1899, 11, 30);
+            return new Date(excelEpoch.getTime() + (serial - 1) * 24 * 60 * 60 * 1000);
+        }
+
+        // Formata Mês/Ano, tratando números do Excel
+        function formatMesAno(value) {
+            if (!value) return 'Indefinido';
+
+            // Se for número (data serial do Excel)
+            if (typeof value === 'number' && value > 40000) {
+                const date = excelDateToJSDate(value);
+                if (date) {
+                    const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+                    const year = date.getUTCFullYear();
+                    return `${month}/${year}`;
+                }
+            }
+            
+            // Se for string, apenas retorna
+            if (typeof value === 'string' && value.match(/^\d{2}\/\d{4}$/)) {
+                return value;
+            }
+            
+            // Tenta tratar outros formatos de data
+            try {
+                const date = new Date(value);
+                if (!isNaN(date.getTime())) {
+                     const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+                    const year = date.getUTCFullYear();
+                    return `${month}/${year}`;
+                }
+            } catch(e) {}
+
+            return String(value); // Retorna o valor original se não puder formatar
+        }
+
+        // Ordena datas no formato "MM/YYYY"
+        function sortMesAno(a, b) {
+            const [monthA, yearA] = a.split('/').map(Number);
+            const [monthB, yearB] = b.split('/').map(Number);
+
+            if (yearA !== yearB) {
+                return yearA - yearB;
+            }
+            return monthA - monthB;
         }
 
     </script>
